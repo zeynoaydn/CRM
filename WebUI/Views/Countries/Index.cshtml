@@ -1,0 +1,270 @@
+﻿@*@using Entities.Concrete;
+@{
+    var countries = ViewData["Countries"] as List<Countries>;
+}*@
+
+@*@model List<Business.Dtos.CountriesDto>
+
+@foreach (var item in Model)
+{
+    <div>
+        @item.Id
+        @item.CountryName
+    </div>
+}*@
+
+<div><h1>Countries</h1></div>
+
+<br />
+
+<button type="button" class="btn btn-warning" id="handleGetCountries">
+    Get All
+</button>
+
+<table class="table table-bordered">
+    <tbody id="countries_list">
+    </tbody>
+</table>
+
+@*----------*@
+
+<button type="button" class="btn btn-warning" id="handleGetCountryById">
+    Get By Id
+</button>
+
+<div id="idget"></div>
+
+<input type="text" id="countryId" placeholder="Id Of Country" class="form-control" />
+
+<table class="table table-bordered">
+    <tbody id="countries_list_id">
+    </tbody>
+</table>
+
+@*----------*@
+
+<button type="button" class="btn btn-warning" id="handleAddCountry">
+    Add
+</button>
+<div class="modal fade" id="addCountryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="addName">Name</label>
+                    <input type="text" id="addName" class="form-control">
+                    <br>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitAddForm">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+
+@*----------*@
+
+<table class="table table-bordered">
+    <tr>
+        <th>Id</th>
+        <th>Country Name</th>
+    </tr>
+    @foreach (var country in Model)
+    {
+        <tr>
+            <td>@country.Id</td>
+            <td>@country.CountryName</td>
+            <td>
+                <button type="button" class="btn btn-warning deleteBtn" data-country-id="@country.Id">
+                    Delete
+                </button>
+                <button type="button" class="btn btn-warning updateBtn" data-country-id="@country.Id">
+                    Edit
+                </button>
+            </td>
+        </tr>
+    }
+</table>
+
+<div class="modal fade" id="editCountryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="editName">Country Name</label>
+                    <input type="text" id="editName" class="form-control">
+                    <br>
+
+                    <input type="hidden" id="editId" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitEditForm">Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $('#handleGetCountries').click(function () {
+        $.ajax({
+            url: "@Url.Action("GetCountries","Countries")",
+            method: "POST",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+                var countries_list = $("#countries_list");
+                countries_list.empty();
+                countries_list.append(`
+                            <tr>
+                                <th>Id</th>
+                                <th>Country Name</th>
+                            </tr>
+                        `);
+                response.map(item => {
+                    countries_list.append(`
+                                 <tr>
+                            <th scope="row"> ${item.id}</th>
+                            <td>${item.countryName}</td>
+                                </tr>
+                            `)
+                })
+            }
+        })
+    })
+
+    $('#handleGetCountryById').click(function () {
+        var id = $("#countryId").val();
+        $.ajax({
+            url: "@Url.Action("GetById","Countries")",
+            method: "POST",
+            dataType: "json",
+            data: { countryId: id },
+            success: function (response) {
+                console.log(response)
+                var countries_list = $("#countries_list_id");
+                countries_list.empty();
+                countries_list.append(`
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Country Name</th>
+                                </tr>
+                            `);
+                    countries_list.append(`
+                                     <tr>
+                                <th scope="row"> ${response.data.id}</th>
+                                <td>${response.data.countryName}</td>
+                                    </tr>
+                                `)
+                
+            }
+        })
+    })
+
+    $(document).ready(function () {
+        $('#handleAddCountry').click(function () {
+            $('#addCountryModal').modal('show');
+        });
+        $('#submitAddForm').click(function () {
+            var reqData = {
+                countryName: $('#addName').val(),
+            };
+            $.ajax({
+                url: "@Url.Action("Add","Countries")",
+                method: "POST",
+                dataType: "json",
+                data: reqData,
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        $('#addCountryModal').modal("hide");
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+    });
+    
+    $('.deleteBtn').click(function () {
+        var id = $(this).data("country-id");
+        $.ajax({
+            url: "@Url.Action("Delete","Countries")",
+            method: "POST",
+            dataType: "json",
+            data: { countries: { id } },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message)
+                } else {
+                    alert(response.message)
+                }
+            }
+
+        });
+    })
+   
+    $('#submitEditForm').click(function () {
+        var reqData = {
+            countryName: $('#editName').val(),
+            id: $('#editId').val(),
+        }
+        $.ajax({
+            url: "@Url.Action("Update","Countries")",
+            method: "POST",
+            dataType: "json",
+            data: reqData,
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    $('#editCountryModal').modal("hide");
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+
+    $('.updateBtn').click(function () {
+        var id = $(this).data("country-id");
+        $('#editCountryModal').modal("show");
+
+        $.ajax({
+            url: "@Url.Action("GetById","Countries")",
+            method: "POST",
+            dataType: "json",
+            data: { countryId: id },
+            success: function (response) {
+                console.log(response)
+                if (response.success) {
+
+                    $('#editName').val(response.data.countryName);
+                    $('#editId').val(id);
+
+                } else {
+                    alert(response.message)
+                }
+
+            }
+        });
+
+    });
+</script>

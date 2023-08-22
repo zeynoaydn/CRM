@@ -1,0 +1,359 @@
+﻿@*burada verileri çektik,burayı staj defterine yazabilirsin direkt entity den çektin veriyi*@
+@*@{
+    var products = ViewData["Products"] as List<Products>;
+}
+@foreach (var item in products)
+{
+    <div>
+        @item.Name
+        @item.NumberOfProduct
+        @item.Price
+    </div>
+}*@
+
+@*@model List<Business.Dtos.ProductsDto>
+
+@foreach (var item in Model)
+{
+    <div>
+        @item.Name
+        @item.NumberOfProduct
+        @item.Price
+        @item.Description
+    </div>
+}*@
+
+
+@*----------*@
+
+<div><h1>Products</h1></div>
+
+<button type="button" class="btn btn-warning" id="handleGetProduct">
+    Get All
+</button>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Number Of Product</th>
+        <th>Price</th>
+        <th>Description</th>
+    </tr>
+    <tbody id="product_list">
+    </tbody>
+</table>
+
+@*----------*@
+
+<button type="button" class="btn btn-warning" id="handleGetProductById">
+    Get By Id
+</button>
+
+<div id="idget"></div>
+
+<input type="text" id="productId" placeholder="Id Of Product" class="form-control" />
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Number Of Product</th>
+            <th>Price</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody id="get_id_list">
+    </tbody>
+</table>
+
+@*----------*@
+<div>
+    @*Add.cshtml sayfası için*@
+    @*<a asp-controller="Products" asp-action="Add" class="btn btn-lg btn-warning" type="button">
+        Add New Product
+    </a>*@
+</div>
+@*<button type="button" class="btn btn-warning" id="handleAddProduct">
+    Add
+</button>
+<br>
+<br />
+
+<div id="formList">
+    <input type="text" id="name" placeholder="Product Name"><br><br />
+    <input type="text" id="numberOfProduct" placeholder="Number Of Product"><br><br />
+    <input type="text" id="price" placeholder="Price"><br><br />
+    <input type="text" id="description" placeholder="Description"><br><br />
+</div>*@
+
+<button type="button" class="btn btn-warning" id="handleAddProduct">
+    Add
+</button>
+<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="addName">Name</label>
+                    <input type="text" id="addName" class="form-control">
+                    <br>
+
+                    <label for="addtNumberOfProduct">Number Of Product</label>
+                    <input type="text" id="addNumberOfProduct" class="form-control">
+                    <br>
+
+                    <label for="addeditPrice">Price</label>
+                    <input type="text" id="addPrice" class="form-control">
+                    <br>
+
+                    <label for="addDescription">Description</label>
+                    <input type="text" id="addDescription" class="form-control">
+                    <br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitAddForm">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+
+@*----------*@
+
+<br />
+<table class="table table-bordered">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Number Of Product</th>
+        <th>Price</th>
+        <th>Description</th>
+        @*<th>Actions</th>*@
+    </tr>
+    @foreach (var product in Model)
+    {
+        <tr>
+            <td>@product.Id</td>
+            <td>@product.Name</td>
+            <td>@product.NumberOfProduct</td>
+            <td>@product.Price</td>
+            <td>@product.Description</td>
+            <td>
+                <button type="button" class="btn btn-warning deleteBtn" data-product-id="@product.Id" id="handleDeleteProduct">
+                    Delete
+                </button>
+                <button type="button" class="btn btn-warning updateBtn" data-product-id="@product.Id">
+                    Edit
+                </button>
+            </td>
+        </tr>
+    }
+</table>
+
+<div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="editName">Name</label>
+                    <input type="text" id="editName" class="form-control">
+                    <br>
+
+                    <label for="editNumberOfProduct">Number Of Product</label>
+                    <input type="text" id="editNumberOfProduct" class="form-control">
+                    <br>
+
+                    <label for="editPrice">Price</label>
+                    <input type="text" id="editPrice" class="form-control">
+                    <br>
+
+                    <label for="editDescription">Description</label>
+                    <input type="text" id="editDescription" class="form-control">
+                    <br>
+
+                    <input type="hidden" id="editId" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitEditForm">Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    
+    $(document).ready(function () {
+        $('#handleAddProduct').click(function () {
+            $('#addProductModal').modal('show');
+        });
+        $('#submitAddForm').click(function () {
+            var reqData = {
+                name: $('#addName').val(),
+                numberOfProduct: $('#addNumberOfProduct').val(),
+                price: $('#addPrice').val(),
+                description: $('#addDescription').val(),
+            };
+            $.ajax({
+                url: "@Url.Action("Add","Products")",
+                method: "POST",
+                dataType: "json",
+                data: reqData,
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        $('#addProductModal').modal("hide"); 
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+    });
+
+    $('#submitEditForm').click(function () {
+        var reqData = {
+            name: $('#editName').val(),
+            numberOfProduct: $('#editNumberOfProduct').val(),
+            price: $('#editPrice').val(),
+            description:$('#editDescription').val(),
+            id: $('#editId').val(),
+        }
+        $.ajax({
+            url: "@Url.Action("Update","Products")",
+            method: "POST",
+            dataType: "json",
+            data: reqData,
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    $('#editProductModal').modal("hide");
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+
+    $('.updateBtn').click(function () {
+        var id = $(this).data("product-id");
+        $('#editProductModal').modal("show");
+
+        $.ajax({
+            url: "@Url.Action("GetById","Products")",
+            method: "POST",
+            dataType: "json",
+            data: { productId: id },
+            success: function (response) {
+                console.log(response)
+                if (response.success) {
+
+                    $('#editName').val(response.data.name);
+                    $('#editNumberOfProduct').val(response.data.numberOfProduct);
+                    $('#editPrice').val(response.data.price);
+                    $('#editDescription').val(response.data.description);
+                    $('#editId').val(id);
+
+                } else {
+                    alert(response.message)
+                }
+
+            }
+        });
+
+    });
+
+    $('#handleGetProduct').click(function () {
+        $.ajax({
+            //url: "/ProductsDto/Post",
+            url: "@Url.Action("GetProducts","Products")",
+            method: "POST",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+                var product_list = $("#product_list");
+                product_list.empty();
+                response.map(item => {
+                    product_list.append(`
+                                                            <tr>
+                                                                <td>${item.id}</td>
+                                                                <td>${item.name}</td>
+                                                                <td>${item.numberOfProduct}</td>
+                                                                <td>${item.price}</td>
+                                                                    <td>${item.description}</td>
+
+                                                            </tr>
+                                                        `)
+                });
+            }
+        });
+    });
+
+    $('#handleGetProductById').click(function () {
+        var id = $("#productId").val();
+        $.ajax({
+            url: "@Url.Action("GetById","Products")",
+            method: "POST",
+            dataType: "json",
+            data: { productId: id },
+            success: function (response) {
+                console.log(response)
+                if (response.success) {
+                    var get_id_list = $("#get_id_list");
+                    get_id_list.empty();
+                    get_id_list.append(`
+                                                                        <tr>
+                                                                                <td>${response.data.id}</td>
+                                                                            <td>${response.data.name}</td>
+                                                                            <td>${response.data.numberOfProduct}</td>
+                                                                                <td>${response.data.price}</td>
+                                                                                    <td>${response.data.description}</td>
+
+                                                                        </tr>
+                                                                    `)
+                } else {
+                    alert(response.message)
+                }
+
+            }
+        });
+    });
+
+    $('.deleteBtn').click(function () {
+        var id = $(this).data("product-id");
+        $.ajax({
+            url: "@Url.Action("Delete","Products")",
+            method: "POST",
+            dataType: "json",
+            data: { products: { id } },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message)
+                } else {
+                    alert(response.message)
+                }
+            }
+
+        });
+    })
+
+</script>

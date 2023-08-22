@@ -1,0 +1,286 @@
+﻿@*@model List<Business.Dtos.CitiesDto>
+
+@foreach (var item in Model)
+{
+    <div>
+        @item.CountryId
+        @item.CityName
+    </div>
+}*@
+
+<div><h1>Cities</h1></div>
+
+<button type="button" class="btn btn-warning" id="handleGetCities">
+    Get All
+</button>
+
+<table class="table table-bordered">
+    <tbody id="cities_list">
+    </tbody>
+</table>
+
+@*----------*@
+
+<button type="button" class="btn btn-warning" id="handleGetCityById">
+    Get By Id
+</button>
+
+<div id="idget"></div>
+
+<input type="text" id="cityId" placeholder="Id Of City" class="form-control" />
+
+<table class="table table-bordered">
+    <tbody id="cities_list_id">
+    </tbody>
+</table>
+
+@*----------*@
+
+<button type="button" class="btn btn-warning" id="handleAddCountry">
+    Add
+</button>
+<div class="modal fade" id="addCityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="addName">City Name</label>
+                    <input type="text" id="addName" class="form-control">
+                    <br>
+
+                    @*<label for="addCountryName">Country Name</label>
+                    <input type="text" id="addCountryName" class="form-control">
+                    <br>*@
+
+                    <label for="addCountryId">Country Id</label>
+                    <input type="text" id="addCountryId" class="form-control">
+                    <br>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitAddForm">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+@*@*----------*@
+
+
+<table class="table table-bordered">
+    <tr>
+        <th>Id</th>
+        <th>Country Id</th>
+        <th>City Name</th>
+    </tr>
+    @foreach (var city in Model)
+    {
+        <tr>
+            <td>@city.Id</td>
+            <td>@city.CountryId</td>
+            <td>@city.CityName</td>
+            <td>
+                <button type="button" class="btn btn-warning deleteBtn" data-city-id="@city.Id">
+                    Delete
+                </button>
+                <button type="button" class="btn btn-warning updateBtn" data-city-id="@city.Id">
+                    Edit
+                </button>
+            </td>
+        </tr>
+    }
+</table>
+
+<div class="modal fade" id="editCityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Product</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <label for="editCountryId">Country Id</label>
+                    <input type="text" id="editCountryId" class="form-control">
+                    <br>
+
+                    <label for="editName">City Name</label>
+                    <input type="text" id="editName" class="form-control">
+                    <br>
+
+                    <input type="hidden" id="editId" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitEditForm">Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $('#handleGetCities').click(function () {
+        $.ajax({
+            url: "@Url.Action("GetCities","Cities")",
+            method: "POST",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+                var cities_list = $("#cities_list");
+                cities_list.empty();
+                cities_list.append(`
+                            <tr>
+                                        <th>Country Id</th>
+                                            <th>Country Name</th>
+                                    <th>City Name</th>
+                                    
+                            </tr>
+                        `);
+                response.map(item => {
+                    cities_list.append(`
+                                 <tr>
+                                    <td>${item.countryId}</td>
+                                        <td>${item.countryName}</td>
+                                <td>${item.cityName}</td>
+                                
+                                </tr>
+                            `)
+                })
+            }
+        })
+    })
+
+    $('#handleGetCityById').click(function () {
+        var id = $("#cityId").val();
+        $.ajax({
+            url: "@Url.Action("GetById","Cities")",
+            method: "POST",
+            dataType: "json",
+            data: { cityId: id },
+            success: function (response) {
+                console.log(response)
+                var cities_list = $("#cities_list_id");
+                cities_list.empty();
+                cities_list.append(`
+                                    <tr>
+                                        <th>Id</th>
+                                            <th>Country Id</th>
+                                            <th>City Name</th>
+                                    </tr>
+                                `);
+                cities_list.append(`
+                                         <tr>
+                                    <th scope="row"> ${response.data.id}</th>
+                                        <td>${response.data.countryId}</td>
+                                        <td>${response.data.cityName}</td>
+                                        </tr>
+                                    `)
+
+            }
+        })
+    })
+
+    $(document).ready(function () {
+        $('#handleAddCountry').click(function () {
+            $('#addCityModal').modal('show');
+        });
+        $('#submitAddForm').click(function () {
+            var reqData = {
+                cityName: $('#addName').val(),
+                countryId: $('#addCountryId').val(),
+            };
+            $.ajax({
+                url: "@Url.Action("Add","Cities")",
+                method: "POST",
+                dataType: "json",
+                data: reqData,
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        $('#addCityModal').modal("hide");
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            });
+        });
+    });
+
+    $('.deleteBtn').click(function () {
+        var id = $(this).data("city-id");
+        $.ajax({
+            url: "@Url.Action("Delete","Cities")",
+            method: "POST",
+            dataType: "json",
+            data: { cities: { id } },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message)
+                } else {
+                    alert(response.message)
+                }
+            }
+
+        });
+    })
+
+    $('#submitEditForm').click(function () {
+        var reqData = {
+            countryId: $('#editCountryId').val(),
+            cityName: $('#editName').val(),
+            id: $('#editId').val(),
+        }
+        $.ajax({
+            url: "@Url.Action("Update","Cities")",
+            method: "POST",
+            dataType: "json",
+            data: reqData,
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    $('#editCityModal').modal("hide");
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+
+    $('.updateBtn').click(function () {
+        var id = $(this).data("city-id");
+        $('#editCityModal').modal("show");
+        $.ajax({
+            url: "@Url.Action("GetById","Cities")",
+            method: "POST",
+            dataType: "json",
+            data: { cityId: id },
+            success: function (response) {
+                console.log(response)
+                if (response.success) {
+                    $('#editCountryId').val(response.data.countryId);
+                    $('#editName').val(response.data.cityName);
+                    $('#editId').val(id);
+
+                } else {
+                    alert(response.message)
+                }
+
+            }
+        });
+
+    });
+
+</script>
